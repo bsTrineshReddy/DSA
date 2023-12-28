@@ -1,0 +1,12 @@
+add codes of 
+
+1. assign cookies
+2.lemonade change
+3.valid parentheiss checker
+4. jumpgame 1,2
+5. cndy
+6.Program for Shortest Job First (or …
+7.Program for Least Recently Used (LR
+8.Non-overlapping Intervals
+9. insert interval (if any other impl code in leetcode)
+10. merge overlapping intervlas(if any oher in leetcode)

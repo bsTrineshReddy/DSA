@@ -1,0 +1,22 @@
+Applications of Linked Lists:
+
+Creating Data Structures: Linked lists serve as the foundation for building other dynamic data structures, 
+such as stacks and queues.
+
+Dynamic Memory Allocation: Dynamic memory allocation relies on linked lists to manage and allocate memory blocks efficiently.
+
+Web Browser is one important application of Linked List.
+
+in 64 bit system pointer size = 8bytes, int size = 4bytes
+in 32 bit system pointer size = 4bytes,  int size = 4bytes
+
+
+
+
+
+
+
+TODO: 
+1) sort o,1,2  2approaches in striver video
+2) sort linked list in groups of size k using recursion
+3)  know exact proof of findind loop in linked list

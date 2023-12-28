@@ -1,0 +1,15 @@
+
+todo
+1) Min Heap and Max Heap Implementatio…
+2)Check if an array represents a min heap
+3)Convert min Heap to max Heap
+4)Connect `n` ropes with minimal cost
+5)Task Scheduler
+6)Hands of Straights
+
+
+7)Design twitter
+8)Connect `n` ropes with minimal cost
+9)Kth largest element in a stream of …
+10)Maximum Sum Combination
+11)K most frequent elements
