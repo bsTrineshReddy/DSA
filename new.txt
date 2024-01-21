@@ -1,1 +1,100 @@
-iiii
+Test1 : IPSecSetSADelayDeleteTime grpc function test
+ - Default DelayTime will be 30seconds
+ - set delaytime = 45 seconds for test
+ 
+ GrpcRequest:
+ {
+  "DelayTime": 45
+ } 
+
+ GrpcResponse:
+ {
+  "ApiStatus": "API_STATUS_OK"
+ }
+
+// initial there are total 6 ipsec sas
+
+# pdsctl show ipsec-sa
+----------------------------------------------------------------------------------------------------
+sa_idx          sa_type         spi            key_size    esn     
+----------------------------------------------------------------------------------------------------
+1               encrypt         7              128         false   
+1               decrypt         8              128         false   
+2               encrypt         5              128         false   
+2               decrypt         6              128         false   
+3               encrypt         3              128         false   
+3               decrypt         4              128         false   
+
+
+// delete ipsec-sa with spi:4
+# ip x s d src 13.1.14.2 dst 13.7.19.2 proto esp spi 0x00000004
+
+// dump ipsec-sas before 45 seconds
+// observe that no ipsec-sa got deleted
+
+# pdsctl show ipsec-sa
+----------------------------------------------------------------------------------------------------
+sa_idx          sa_type         spi            key_size    esn     
+----------------------------------------------------------------------------------------------------
+1               encrypt         7              128         false   
+1               decrypt         8              128         false   
+2               encrypt         5              128         false   
+2               decrypt         6              128         false   
+3               encrypt         3              128         false   
+3               decrypt         4              128         false   
+
+
+
+// dump ipsec sa after 45 seconds
+// observe that ipsec-sa with spi:4 got deleted
+
+# pdsctl show ipsec-sa
+----------------------------------------------------------------------------------------------------
+sa_idx          sa_type         spi            key_size    esn     
+----------------------------------------------------------------------------------------------------
+1               encrypt         7              128         false   
+1               decrypt         8              128         false   
+2               encrypt         5              128         false   
+2               decrypt         6              128         false   
+3               encrypt         3              128         false   
+
+
+conclusion: verfied working of IPSecSetSADelayDeleteTime grpc function test
+
+
+
+TEST2: 
+- boot up elba in NON VSI MODE and try to use ipsec clis and functionality
+- ipsec is only supported in VSI MODE
+- using pdsctl ipsec cmds in NON VSI MODE returns API_STATUS_NOT_FOUND
+
+
+# pdsctl show ipsec-sa
+Error: Operation failed with API_STATUS_NOT_FOUND error
+Usage:
+  pdsctl show ipsec-sa [flags]
+
+Flags:
+  -h, --help          help for ipsec-sa
+      --id uint32     SA index
+      --show-keys     Show hidden keys
+      --type string   SA Type (encrypt or decrypt)
+
+
+# pdsctl show ipsec-spi
+Error: Operation failed with API_STATUS_NOT_FOUND error
+Usage:
+  pdsctl show ipsec-spi [flags]
+
+Flags:
+  -h, --help   help for ipsec-spi
+
+
+# pdsctl show secure-session
+Error: Operation failed with API_STATUS_NOT_FOUND error
+Usage:
+  pdsctl show secure-session [flags]
+
+Flags:
+  -h, --help        help for secure-session
+      --id uint32   sessidx (default 1)
