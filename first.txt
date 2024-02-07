@@ -1,0 +1,138 @@
+
+Test: Live Migration Test
+      Migrating from node1 to node2.
+
+step1: Create secure-session and populate ipsec-sa for this secure-session in node1
+       node1 data after above step
+       [root@12c6aaa7336c nic]# agni/test/apps/test-client/sec_config_command.py  10.9.4.31  ipsec sadb_dump                                                                       
+        SADB entry 1
+       local_ip: 13.11.194.2, remote_ip: 13.0.141.2
+       local_ovly_ip: 2.0.0.3, local_vni: 1000  remote_ovly_ip: 2.0.0.2, remote_vni: 1000
+       outbound_spi: 7, outbound_sa_index: 1
+       inbound_spi: 8 inbound_sa_index: 1
+       inbound_spi_old: 0, inbound_old_sa_index: 0
+
+       # pdsctl show ipsec-sa
+       --------------------------------------------------------------------------------------------------------------
+       sa_idx           sa_type         spi              key_size    esn     
+       --------------------------------------------------------------------------------------------------------------
+       1                encrypt         7                128         false   
+       1                decrypt         8                128         false   
+
+        No. of IPSec SAs : 2
+
+
+       # pdsctl show ipsec-spi
+       ---------------------------------------------------------------------------------------------
+       spi              dst IP                   vni              inbound SA       rx-vnic-id       
+       ---------------------------------------------------------------------------------------------
+       8                2.0.0.3                  1000             1                448              
+
+       No. of IPSec SPIs : 1
+
+
+      # pdsctl show secure-session
+      -------------------------------------------------------
+      sec_sess_idx     outbound_sa_idx  
+      -------------------------------------------------------
+      88               1                
+
+      No. of IPSec Secure Sessions : 1
+
+step2: invoke grpc function IPSecSecureSessionMigrate in node1 with below spec
+       {
+        "Spec": {
+        "Key": {
+            "LocalIPAddr": 218874370,
+            "RemoteIPAddr": 218139906
+            },
+        "Op": 1,
+        "State": {
+
+        }
+        }
+       }
+
+       Op = 1 means MIGRATION_OP_MOVE_OUT_START
+
+       the response will be contain ipsec-sa information 
+       GRPC Response:
+       {
+        "ApiStatus": "API_STATUS_OK",
+        "State": {
+          "CryptoAlgoName": "rfc4106(gcm(aes))",
+          "CryptoAlgoKeyLen": 16,
+          "CryptoAlgoICVLen": 16,
+          "Esn": false,
+          "OutBoundSA": {
+            "Spi": 7,
+            "Direction": "IPSEC_SA_DIR_OUTBOUND",
+            "SequenceNum": "0",
+            "KeyMaterialLen": 20,
+            "KeyMaterial": {
+         
+              "data": [
+                68, 67,66,65,52,51,50,49,36,35,34,33,20,19,18,17,244,243,242,241 ]
+            }
+          },
+          "InBoundSA": {
+            "Spi": 8,
+            "Direction": "IPSEC_SA_DIR_INBOUND",
+            "SequenceNum": "0",
+            "KeyMaterialLen": 20,
+            "KeyMaterial": {
+              "data": [68,67,66,65,52,51,50,49,36,35,34,33,20,19,18,17,244,243,242,241]
+            }
+          }
+        },
+      
+      }
+
+step3: in node2 create secure-session 
+       ipsec-sa state in node2 before Migration
+       [root@12c6aaa7336c nic]# agni/test/apps/test-client/sec_config_command.py  10.9.5.163  ipsec sadb_dump                                                                      
+        SADB entry 1
+          local_ip: 11.0.0.2, remote_ip: 11.0.0.2
+          local_ovly_ip: 2.0.0.3, local_vni: 1000  remote_ovly_ip: 2.0.0.2, remote_vni: 1000
+          outbound_spi: 0, outbound_sa_index: 0
+          inbound_spi: 0 inbound_sa_index: 0
+          inbound_spi_old: 0, inbound_old_sa_index: 0
+
+        observe no ipsec-sas are there
+
+step3: with response got in above grpc call invoke IPSecSecureSessionMigrate in node2 with op = MIGRATION_OP_MOVE_IN_START
+
+step4: after above call is succesful ipsec-sa p4 tables will be populated
+       ipsec-sa pdsctl output in node2 after migration from node1 to node2
+
+       # pdsctl show ipsec-sa
+       --------------------------------------------------------------------------------------------------------------
+       sa_idx           sa_type         spi              key_size    esn     
+       --------------------------------------------------------------------------------------------------------------
+       1                encrypt         7                128         false   
+       1                decrypt         8                128         false 
+ 
+       No. of IPSec SAs : 2
+
+
+      # pdsctl show ipsec-spi
+       ---------------------------------------------------------------------------------------------
+       spi              dst IP                   vni              inbound SA       rx-vnic-id       
+       ---------------------------------------------------------------------------------------------
+       8                2.0.0.3                  1000             1                336
+
+       No. of IPSec SPIs : 1
+
+
+      # pdsctl show secure-session
+      -------------------------------------------------------
+      sec_sess_idx     outbound_sa_idx  
+      -------------------------------------------------------
+      66               1 
+
+      No. of IPSec Secure Sessions : 1
+
+step5: invoke IPSecSecureSessionMigrate in node1 with op = MIGRATION_OP_MOVE_OUT_DONE
+step6: invoke IPSecSecureSessionMigrate in node2 with op = MIGRATION_OP_MOVE_IN_DONE
+
+conclusion: sucessfully tested live migration

@@ -1,0 +1,14 @@
+segment tree:
+- query time will be atmost 4log(n) (To query a sum, we process at most four nodes at every level and number of levels is O(Logn))
+- update time will be log(n) (To update a leaf value, we process one node at every level and number of levels is O(Logn).)
+
+- max size = int max_size = 2*(int)pow(2, x) - 1;   (x = (int)(ceil(log2(n)));)
+- if n is size of array then segmnet tree size is less than 4n
+For each node at index i in segment tree, the left child is at index 2*i + 1, the right child at 2*i + 2 and the parent is at (i-1)/2
+-Array representation of Segment Trees: Like Heap, segment tree is also represented as an array. 
+The difference here is, it is not a complete binary tree. It is rather a full binary tree (every node has 0 or 2 children)
+ and all levels are filled except possibly the last level. Unlike Heap, the last level may have gaps between nodes. Below are the
+
+binary indexed tree or fenwick tree
+- query = log(n) operation not O(4log(n)) as seen in segment tree
+- update = log(n) operation

@@ -1,103 +1,68 @@
 /*
  word search 1
 */
-//method1: striver
-bool searchNext(vector<vector<char>> &board, string word, int row, int col, 
-    int index, int m, int n) {
+// method 1: backtarcking leetcode
+class Solution {
+private:
+    std::vector<std::vector<char>> board;
+    int ROWS;
+    int COLS;
 
-        // if index reaches at the end that means we have found the word
-        if (index == word.length())
-            return true;
+public:
+    bool exist(std::vector<std::vector<char>>& board, std::string word) {
+        this->board = board;
+        this->ROWS = board.size();
+        this->COLS = board[0].size();
 
-        // Checking the boundaries if the character at which we are placed is not 
-        //the required character
-        if (row < 0 || col < 0 || row == m || col == n || board[row][col] != 
-        word[index] or board[row][col] == '!')
-            return false;
-
-        // this is to prevent reusing of the same character
-        char c = board[row][col];
-        board[row][col] = '!';
-
-        // top direction
-        bool top = searchNext(board, word, row - 1, col, index + 1, m, n);
-        // right direction
-        bool right = searchNext(board, word, row, col + 1, index + 1, m, n);
-        // bottom direction
-        bool bottom = searchNext(board, word, row + 1, col, index + 1, m, n);
-        // left direction
-        bool left = searchNext(board, word, row, col - 1, index + 1, m, n);
-
-        board[row][col] = c; // undo change
-
-        return top || right || bottom || left;
-    }
-    bool exist(vector<vector<char>> board, string word) {
-
-        int m = board.size();
-        int n = board[0].size();
-
-        int index = 0;
-
-        // First search the first character
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-
-                if (board[i][j] == word[index]) {
-                    if (searchNext(board, word, i, j, index, m, n))
-                        return true;
-                }
-            }
-        }
-
+        for (int row = 0; row < this->ROWS; ++row)
+            for (int col = 0; col < this->COLS; ++col)
+                if (this->backtrack(row, col, word, 0))
+                    return true;
         return false;
     }
-----------------------------
-// method 2: backtarcking leetcode
-class Solution {
-  private char[][] board;
-  private int ROWS;
-  private int COLS;
 
-  public boolean exist(char[][] board, String word) {
-    this.board = board;
-    this.ROWS = board.length;
-    this.COLS = board[0].length;
+private:
+    bool backtrack(int row, int col, const std::string& word, int index) {
+        /* Step 1). check the bottom case. */
+        if (index >= word.length())
+            return true;
 
-    for (int row = 0; row < this.ROWS; ++row)
-      for (int col = 0; col < this.COLS; ++col)
-        if (this.backtrack(row, col, word, 0))
-          return true;
-    return false;
-  }
+        /* Step 2). Check the boundaries. */
+        if (row < 0 || row == this->ROWS || col < 0 || col == this->COLS
+            || this->board[row][col] != word[index])
+            return false;
 
-  protected boolean backtrack(int row, int col, String word, int index) {
-    /* Step 1). check the bottom case. */
-    if (index >= word.length())
-      return true;
+        /* Step 3). explore the neighbors in DFS */
+        bool ret = false;
+        // mark the path before the next exploration
+        this->board[row][col] = '#';
 
-    /* Step 2). Check the boundaries. */
-    if (row < 0 || row == this.ROWS || col < 0 || col == this.COLS
-        || this.board[row][col] != word.charAt(index))
-      return false;
+        int rowOffsets[] = {0, 1, 0, -1};
+        int colOffsets[] = {1, 0, -1, 0};
+        for (int d = 0; d < 4; ++d) {
+            ret = this->backtrack(row + rowOffsets[d], col + colOffsets[d], word, index + 1);
+            if (ret)
+                break;
+        }
 
-    /* Step 3). explore the neighbors in DFS */
-    boolean ret = false;
-    // mark the path before the next exploration
-    this.board[row][col] = '#';
-
-    int[] rowOffsets = {0, 1, 0, -1};
-    int[] colOffsets = {1, 0, -1, 0};
-    for (int d = 0; d < 4; ++d) {
-      ret = this.backtrack(row + rowOffsets[d], col + colOffsets[d], word, index + 1);
-      if (ret)
-        break;
+        /* Step 4). clean up and return the result. */
+        this->board[row][col] = word[index];
+        return ret;
     }
+};
 
-    /* Step 4). clean up and return the result. */
-    this.board[row][col] = word.charAt(index);
-    return ret;
-  }
+int main() {
+    Solution solution;
+    std::vector<std::vector<char>> board = {
+        {'A', 'B', 'C', 'E'},
+        {'S', 'F', 'C', 'S'},
+        {'A', 'D', 'E', 'E'}
+    };
+    std::string word = "ABCCED";
+    bool result = solution.exist(board, word);
+    std::cout << "Existence: " << (result ? "true" : "false") << std::endl;
+
+    return 0;
 }
 ------------------------------------------------------------------------------------------------
 /*
@@ -193,83 +158,93 @@ public:
 };
 -------------------------
 // method2: bcaktracking with trie(leetcode)
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <string>
+
 class TrieNode {
-  HashMap<Character, TrieNode> children = new HashMap<Character, TrieNode>();
-  String word = null;
-  public TrieNode() {}
-}
+public:
+    std::unordered_map<char, TrieNode*> children;
+    std::string word;
+
+    TrieNode() : word("") {}
+};
 
 class Solution {
-  char[][] _board = null;
-  ArrayList<String> _result = new ArrayList<String>();
+private:
+    std::vector<std::vector<char>> board;
+    std::vector<std::string> result;
 
-  public List<String> findWords(char[][] board, String[] words) {
+public:
+    std::vector<std::string> findWords(std::vector<std::vector<char>>& board, std::vector<std::string>& words) {
+        TrieNode* root = new TrieNode();
 
-    // Step 1). Construct the Trie
-    TrieNode root = new TrieNode();
-    for (String word : words) {
-      TrieNode node = root;
+        // Step 1). Construct the Trie
+        for (const std::string& word : words) {
+            TrieNode* node = root;
 
-      for (Character letter : word.toCharArray()) {
-        if (node.children.containsKey(letter)) {
-          node = node.children.get(letter);
-        } else {
-          TrieNode newNode = new TrieNode();
-          node.children.put(letter, newNode);
-          node = newNode;
+            for (char letter : word) {
+                if (node->children.find(letter) != node->children.end()) {
+                    node = node->children[letter];
+                } else {
+                    TrieNode* newNode = new TrieNode();
+                    node->children[letter] = newNode;
+                    node = newNode;
+                }
+            }
+            node->word = word;  // store words in Trie
         }
-      }
-      node.word = word;  // store words in Trie
-    }
 
-    this._board = board;
-    // Step 2). Backtracking starting for each cell in the board
-    for (int row = 0; row < board.length; ++row) {
-      for (int col = 0; col < board[row].length; ++col) {
-        if (root.children.containsKey(board[row][col])) {
-          backtracking(row, col, root);
+        this->board = board;
+        // Step 2). Backtracking starting for each cell in the board
+        for (int row = 0; row < board.size(); ++row) {
+            for (int col = 0; col < board[row].size(); ++col) {
+                if (root->children.find(board[row][col]) != root->children.end()) {
+                    backtracking(row, col, root);
+                }
+            }
         }
-      }
+
+        return this->result;
     }
 
-    return this._result;
-  }
-  
-  private void backtracking(int row, int col, TrieNode parent) {
-    Character letter = this._board[row][col];
-    TrieNode currNode = parent.children.get(letter);
+private:
+    void backtracking(int row, int col, TrieNode* parent) {
+        char letter = this->board[row][col];
+        TrieNode* currNode = parent->children[letter];
 
-    // check if there is any match
-    if (currNode.word != null) {
-      this._result.add(currNode.word);
-      currNode.word = null;
+        // check if there is any match
+        if (!currNode->word.empty()) {
+            this->result.push_back(currNode->word);
+            currNode->word = "";
+        }
+
+        // mark the current letter before the EXPLORATION
+        this->board[row][col] = '#';
+
+        // explore neighbor cells in around-clock directions: up, right, down, left
+        int rowOffset[] = {-1, 0, 1, 0};
+        int colOffset[] = {0, 1, 0, -1};
+        for (int i = 0; i < 4; ++i) {
+            int newRow = row + rowOffset[i];
+            int newCol = col + colOffset[i];
+            if (newRow < 0 || newRow >= this->board.size() || newCol < 0 || newCol >= this->board[0].size()) {
+                continue;
+            }
+            if (currNode->children.find(this->board[newRow][newCol]) != currNode->children.end()) {
+                backtracking(newRow, newCol, currNode);
+            }
+        }
+
+        // End of EXPLORATION, restore the original letter in the board.
+        this->board[row][col] = letter;
+
+        // Optimization: incrementally remove the leaf nodes
+        if (currNode->children.empty()) {
+            parent->children.erase(letter);
+            delete currNode;
+        }
     }
-
-    // mark the current letter before the EXPLORATION
-    this._board[row][col] = '#';
-
-    // explore neighbor cells in around-clock directions: up, right, down, left
-    int[] rowOffset = {-1, 0, 1, 0};
-    int[] colOffset = {0, 1, 0, -1};
-    for (int i = 0; i < 4; ++i) {
-      int newRow = row + rowOffset[i];
-      int newCol = col + colOffset[i];
-      if (newRow < 0 || newRow >= this._board.length || newCol < 0
-          || newCol >= this._board[0].length) {
-        continue;
-      }
-      if (currNode.children.containsKey(this._board[newRow][newCol])) {
-        backtracking(newRow, newCol, currNode);
-      }
-    }
-
-    // End of EXPLORATION, restore the original letter in the board.
-    this._board[row][col] = letter;
-
-    // Optimization: incrementally remove the leaf nodes
-    if (currNode.children.isEmpty()) {
-      parent.children.remove(letter);
-    }
-  }
-}
+};
 ------------------------

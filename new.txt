@@ -1,100 +1,284 @@
-Test1 : IPSecSetSADelayDeleteTime grpc function test
- - Default DelayTime will be 30seconds
- - set delaytime = 45 seconds for test
- 
- GrpcRequest:
- {
-  "DelayTime": 45
- } 
+[root@12c6aaa7336c nic]# python3 python_grpc_cleint.py 10.9.4.31 
+<grpc._channel.Channel object at 0x7f6cf892a8d0>
+Event # 0 Time -> Wed Jan 31 12:12:14 2024
+Received event Type: IPSEC_EVENT_CREATE_SA_REKEY
+Time {
+  seconds: 966605706
+}
+Info {
+  Key {
+    LocalIPAddr: 218567426
+    RemoteIPAddr: 218172930
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Spi: 41
+  Sindex: 66
+}
 
- GrpcResponse:
- {
-  "ApiStatus": "API_STATUS_OK"
- }
+Event # 1 Time -> Wed Jan 31 12:13:24 2024
+Received event Type: IPSEC_EVENT_RECONCILE_SA_MISSING
+Time {
+  seconds: 966605776
+}
+Info {
+  Key {
+    LocalIPAddr: 218675202
+    RemoteIPAddr: 218203650
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Spi: 6
+  Sindex: 99
+}
 
-// initial there are total 6 ipsec sas
+Event # 2 Time -> Wed Jan 31 12:13:24 2024
+Received event Type: IPSEC_EVENT_RECONCILE_SA_MISSING
+Time {
+  seconds: 966605776
+}
+Info {
+  Key {
+    LocalIPAddr: 218675202
+    RemoteIPAddr: 218203650
+  }
+  Direction: IPSEC_SA_DIR_OUTBOUND
+  Spi: 5
+  Sindex: 99
+}
 
-# pdsctl show ipsec-sa
-----------------------------------------------------------------------------------------------------
-sa_idx          sa_type         spi            key_size    esn     
-----------------------------------------------------------------------------------------------------
-1               encrypt         7              128         false   
-1               decrypt         8              128         false   
-2               encrypt         5              128         false   
-2               decrypt         6              128         false   
-3               encrypt         3              128         false   
-3               decrypt         4              128         false   
+Event # 3 Time -> Wed Jan 31 12:13:24 2024
+Received event Type: IPSEC_EVENT_RECONCILE_SA_MISSING
+Time {
+  seconds: 966605776
+}
+Info {
+  Key {
+    LocalIPAddr: 218874370
+    RemoteIPAddr: 218139906
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Spi: 8
+  Sindex: 88
+}
+
+Event # 4 Time -> Wed Jan 31 12:13:24 2024
+Received event Type: IPSEC_EVENT_RECONCILE_SA_MISSING
+Time {
+  seconds: 966605776
+}
+Info {
+  Key {
+    LocalIPAddr: 218874370
+    RemoteIPAddr: 218139906
+  }
+  Direction: IPSEC_SA_DIR_OUTBOUND
+  Spi: 7
+  Sindex: 88
+}
+
+Event # 5 Time -> Wed Jan 31 12:13:24 2024
+Received event Type: IPSEC_EVENT_RECONCILE_SA_EXTRA
+Time {
+  seconds: 966605776
+}
+Info {
+  Key {
+    LocalIPAddr: 251724290
+    RemoteIPAddr: 253231618
+  }
+  Direction: IPSEC_SA_DIR_OUTBOUND
+  Spi: 24
+  Sindex: 77
+}
+
+Event # 6 Time -> Wed Jan 31 12:13:24 2024
+Received event Type: IPSEC_EVENT_RECONCILE_SA_EXTRA
+Time {
+  seconds: 966605776
+}
+Info {
+  Key {
+    LocalIPAddr: 251724290
+    RemoteIPAddr: 253231618
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Spi: 25
+  Sindex: 77
+}
+
+Event # 7 Time -> Wed Jan 31 12:13:24 2024
+Received event Type: IPSEC_EVENT_RECONCILE_SA_EXTRA
+Time {
+  seconds: 966605776
+}
+Info {
+  Key {
+    LocalIPAddr: 251789826
+    RemoteIPAddr: 251855362
+  }
+  Direction: IPSEC_SA_DIR_OUTBOUND
+  Spi: 20
+  Sindex: 70
+}
+
+Event # 8 Time -> Wed Jan 31 12:13:24 2024
+Received event Type: IPSEC_EVENT_RECONCILE_SA_EXTRA
+Time {
+  seconds: 966605776
+}
+Info {
+  Key {
+    LocalIPAddr: 251789826
+    RemoteIPAddr: 251855362
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Spi: 21
+  Sindex: 70
+}
 
 
-// delete ipsec-sa with spi:4
-# ip x s d src 13.1.14.2 dst 13.7.19.2 proto esp spi 0x00000004
+2inbound and 1 outbound
+Event # 9 Time -> Wed Jan 31 12:17:31 2024
+Received event Type: IPSEC_EVENT_DELETE_SA
+Time {
+  seconds: 966606023
+}
+Info {
+  Key {
+    LocalIPAddr: 218675202
+    RemoteIPAddr: 218203650
+  }
+  Direction: IPSEC_SA_DIR_OUTBOUND
+  Sindex: 99
+}
 
-// dump ipsec-sas before 45 seconds
-// observe that no ipsec-sa got deleted
+Event # 10 Time -> Wed Jan 31 12:18:06 2024
+Received event Type: IPSEC_EVENT_DELETE_SA
+Time {
+  seconds: 966606058
+}
+Info {
+  Key {
+    LocalIPAddr: 218675202
+    RemoteIPAddr: 218203650
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Sindex: 99
+}
 
-# pdsctl show ipsec-sa
-----------------------------------------------------------------------------------------------------
-sa_idx          sa_type         spi            key_size    esn     
-----------------------------------------------------------------------------------------------------
-1               encrypt         7              128         false   
-1               decrypt         8              128         false   
-2               encrypt         5              128         false   
-2               decrypt         6              128         false   
-3               encrypt         3              128         false   
-3               decrypt         4              128         false   
+Event # 11 Time -> Wed Jan 31 12:19:12 2024
+Received event Type: IPSEC_EVENT_DELETE_SA_REKEY
+Time {
+  seconds: 966606124
+}
+Info {
+  Key {
+    LocalIPAddr: 218567426
+    RemoteIPAddr: 218172930
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Sindex: 66
+}
 
-
-
-// dump ipsec sa after 45 seconds
-// observe that ipsec-sa with spi:4 got deleted
-
-# pdsctl show ipsec-sa
-----------------------------------------------------------------------------------------------------
-sa_idx          sa_type         spi            key_size    esn     
-----------------------------------------------------------------------------------------------------
-1               encrypt         7              128         false   
-1               decrypt         8              128         false   
-2               encrypt         5              128         false   
-2               decrypt         6              128         false   
-3               encrypt         3              128         false   
-
-
-conclusion: verfied working of IPSecSetSADelayDeleteTime grpc function test
-
-
-
-TEST2: 
-- boot up elba in NON VSI MODE and try to use ipsec clis and functionality
-- ipsec is only supported in VSI MODE
-- using pdsctl ipsec cmds in NON VSI MODE returns API_STATUS_NOT_FOUND
-
-
-# pdsctl show ipsec-sa
-Error: Operation failed with API_STATUS_NOT_FOUND error
-Usage:
-  pdsctl show ipsec-sa [flags]
-
-Flags:
-  -h, --help          help for ipsec-sa
-      --id uint32     SA index
-      --show-keys     Show hidden keys
-      --type string   SA Type (encrypt or decrypt)
-
-
-# pdsctl show ipsec-spi
-Error: Operation failed with API_STATUS_NOT_FOUND error
-Usage:
-  pdsctl show ipsec-spi [flags]
-
-Flags:
-  -h, --help   help for ipsec-spi
+Event # 12 Time -> Wed Jan 31 12:20:16 2024
+Received event Type: IPSEC_EVENT_DELETE_SA
+Time {
+  seconds: 966606188
+}
+Info {
+  Key {
+    LocalIPAddr: 218567426
+    RemoteIPAddr: 218172930
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Sindex: 66
+}
 
 
-# pdsctl show secure-session
-Error: Operation failed with API_STATUS_NOT_FOUND error
-Usage:
-  pdsctl show secure-session [flags]
+============
+[root@12c6aaa7336c nic]# python3 python_grpc_cleint.py 10.9.4.31
+<grpc._channel.Channel object at 0x7f0027535898>
+Event # 0 Time -> Wed Jan 31 11:36:41 2024
+Received event Type: IPSEC_EVENT_CREATE_SA
+Time {
+  seconds: 966603573
+}
+Info {
+  Key {
+    LocalIPAddr: 218675202
+    RemoteIPAddr: 218203650
+  }
+  Direction: IPSEC_SA_DIR_OUTBOUND
+  Spi: 5
+  Sindex: 99
+}
 
-Flags:
-  -h, --help        help for secure-session
-      --id uint32   sessidx (default 1)
+Event # 1 Time -> Wed Jan 31 11:36:41 2024
+Received event Type: IPSEC_EVENT_CREATE_SA
+Time {
+  seconds: 966603573
+}
+Info {
+  Key {
+    LocalIPAddr: 218675202
+    RemoteIPAddr: 218203650
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Spi: 6
+  Sindex: 99
+}
+
+Event # 2 Time -> Wed Jan 31 11:38:31 2024
+Received event Type: IPSEC_EVENT_DELETE_SA
+Time {
+  seconds: 966603683
+}
+Info {
+  Key {
+    LocalIPAddr: 218675202
+    RemoteIPAddr: 218203650
+  }
+  Direction: IPSEC_SA_DIR_OUTBOUND
+  Sindex: 99
+}
+
+Event # 3 Time -> Wed Jan 31 11:39:15 2024
+Received event Type: IPSEC_EVENT_DELETE_SA_REKEY
+Time {
+  seconds: 966603727
+}
+Info {
+  Key {
+    LocalIPAddr: 218675202
+    RemoteIPAddr: 218203650
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Sindex: 99
+}
+
+Event # 4 Time -> Wed Jan 31 11:41:50 2024
+Received event Type: IPSEC_EVENT_DELETE_SA_REKEY
+Time {
+  seconds: 966603882
+}
+Info {
+  Key {
+    LocalIPAddr: 218874370
+    RemoteIPAddr: 218139906
+  }
+  Direction: IPSEC_SA_DIR_INBOUND
+  Sindex: 88
+}
+
+Event # 5 Time -> Wed Jan 31 11:41:50 2024
+Received event Type: IPSEC_EVENT_DELETE_SA
+Time {
+  seconds: 966603882
+}
+Info {
+  Key {
+    LocalIPAddr: 218874370
+    RemoteIPAddr: 218139906
+  }
+  Direction: IPSEC_SA_DIR_OUTBOUND
+  Sindex: 88
+}

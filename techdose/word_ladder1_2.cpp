@@ -8,8 +8,8 @@ public:
     int ladderLength(string beginWord, string endWord, vector<string>& wordList) {  
         unordered_set<string> myset;
         bool isPresent = false; //Checks if endWord is present in Dict
-        //Insert all words from Dict in myset
-        for(auto word: wordList)
+        // Insert all words from Dict in myset
+        for (auto word: wordList)
         {
             if(endWord.compare(word)==0)
                 isPresent = true;
@@ -111,54 +111,45 @@ public:
 ----------------------------
 // method3: bfs with preprocessing leetcode
 class Solution {
-    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
-
-        // Since all words are of same length.
+public:
+    int ladderLength(std::string beginWord, std::string endWord, std::vector<std::string>& wordList) {
         int L = beginWord.length();
 
         // Dictionary to hold combination of words that can be formed,
         // from any given word. By changing one letter at a time.
-        Map<String, List<String>> allComboDict = new HashMap<>();
+        std::unordered_map<std::string, std::vector<std::string>> allComboDict;
 
-        wordList.forEach( word -> {
+        for (const std::string& word : wordList) {
             for (int i = 0; i < L; i++) {
-                // Key is the generic word
-                // Value is a list of words which have the same intermediate generic word.
-                String newWord = word.substring(0, i) + '*' + word.substring(i + 1, L);
-                List<String> transformations = allComboDict.getOrDefault(newWord, new ArrayList<>());
-                transformations.add(word);
-                allComboDict.put(newWord, transformations);
+                std::string newWord = word.substr(0, i) + '*' + word.substr(i + 1);
+                allComboDict[newWord].push_back(word);
             }
-        });
+        }
 
         // Queue for BFS
-        Queue<Pair<String, Integer>> Q = new LinkedList<>();
-        Q.add(new Pair(beginWord, 1));
+        std::queue<std::pair<std::string, int>> Q;
+        Q.push({beginWord, 1});
 
-        // Visited to make sure we don't repeat processing same word.
-        Map<String, Boolean> visited = new HashMap<>();
-        visited.put(beginWord, true);
+        // Visited to make sure we don't repeat processing the same word.
+        std::unordered_map<std::string, bool> visited;
+        visited[beginWord] = true;
 
-        while (!Q.isEmpty()) {
-            Pair<String, Integer> node = Q.remove();
-            String word = node.getKey();
-            int level = node.getValue();
+        while (!Q.empty()) {
+            auto node = Q.front();
+            Q.pop();
+            std::string word = node.first;
+            int level = node.second;
+
             for (int i = 0; i < L; i++) {
+                std::string newWord = word.substr(0, i) + '*' + word.substr(i + 1);
 
-                // Intermediate words for current word
-                String newWord = word.substring(0, i) + '*' + word.substring(i + 1, L);
-
-                // Next states are all the words which share the same intermediate state.
-                for (String adjacentWord : allComboDict.getOrDefault(newWord, new ArrayList<>())) {
-                    // If at any point if we find what we are looking for
-                    // i.e. the end word - we can return with the answer.
-                    if (adjacentWord.equals(endWord)) {
+                for (const std::string& adjacentWord : allComboDict[newWord]) {
+                    if (adjacentWord == endWord) {
                         return level + 1;
                     }
-                    // Otherwise, add it to the BFS Queue. Also mark it visited
-                    if (!visited.containsKey(adjacentWord)) {
-                        visited.put(adjacentWord, true);
-                        Q.add(new Pair(adjacentWord, level + 1));
+                    if (!visited.count(adjacentWord)) {
+                        visited[adjacentWord] = true;
+                        Q.push({adjacentWord, level + 1});
                     }
                 }
             }
@@ -166,51 +157,36 @@ class Solution {
 
         return 0;
     }
-}
+};
 ----------------------------
 // method4: bidirectional bfs
 class Solution {
+private:
+    int L;
+    std::unordered_map<std::string, std::vector<std::string>> allComboDict;
 
-    private int L;
-    private Map<String, List<String>> allComboDict;
-
-    Solution() {
-        this.L = 0;
-
-        // Dictionary to hold combination of words that can be formed,
-        // from any given word. By changing one letter at a time.
-        this.allComboDict = new HashMap<>();
-    }
-
-    private int visitWordNode(
-            Queue<Pair<String, Integer>> Q,
-            Map<String, Integer> visited,
-            Map<String, Integer> othersVisited) {
+    int visitWordNode(
+        std::queue<std::pair<std::string, int>>& Q,
+        std::unordered_map<std::string, int>& visited,
+        std::unordered_map<std::string, int>& othersVisited) {
 
         for (int j = Q.size(); j > 0; j--) {
-            
-            Pair<String, Integer> node = Q.remove();
-            String word = node.getKey();
-            int level = node.getValue();
+            auto node = Q.front();
+            Q.pop();
+            std::string word = node.first;
+            int level = node.second;
 
-            for (int i = 0; i < this.L; i++) {
+            for (int i = 0; i < this->L; i++) {
+                std::string newWord = word.substr(0, i) + '*' + word.substr(i + 1, L);
 
-                // Intermediate words for current word
-                String newWord = word.substring(0, i) + '*' + word.substring(i + 1, L);
-
-                // Next states are all the words which share the same intermediate state.
-                for (String adjacentWord : this.allComboDict.getOrDefault(newWord, new ArrayList<>())) {
-                    // If at any point if we find what we are looking for
-                    // i.e. the end word - we can return with the answer.
-                    if (othersVisited.containsKey(adjacentWord)) {
-                        return level + othersVisited.get(adjacentWord);
+                for (const std::string& adjacentWord : this->allComboDict[newWord]) {
+                    if (othersVisited.find(adjacentWord) != othersVisited.end()) {
+                        return level + othersVisited[adjacentWord];
                     }
 
-                    if (!visited.containsKey(adjacentWord)) {
-
-                        // Save the level as the value of the dictionary, to save number of hops.
-                        visited.put(adjacentWord, level + 1);
-                        Q.add(new Pair(adjacentWord, level + 1));
+                    if (visited.find(adjacentWord) == visited.end()) {
+                        visited[adjacentWord] = level + 1;
+                        Q.push({adjacentWord, level + 1});
                     }
                 }
             }
@@ -218,49 +194,40 @@ class Solution {
         return -1;
     }
 
-    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+public:
+    Solution() {
+        this->L = 0;
+    }
 
-        if (!wordList.contains(endWord)) {
+    int ladderLength(std::string beginWord, std::string endWord, std::vector<std::string>& wordList) {
+
+        if (std::find(wordList.begin(), wordList.end(), endWord) == wordList.end()) {
             return 0;
         }
 
-        // Since all words are of same length.
-        this.L = beginWord.length();
+        this->L = beginWord.length();
 
-        wordList.forEach( word -> {
+        for (const std::string& word : wordList) {
             for (int i = 0; i < L; i++) {
-                // Key is the generic word
-                // Value is a list of words which have the same intermediate generic word.
-                String newWord = word.substring(0, i) + '*' + word.substring(i + 1, L);
-                List<String> transformations =
-                        this.allComboDict.getOrDefault(newWord, new ArrayList<>());
-                transformations.add(word);
-                this.allComboDict.put(newWord, transformations);
+                std::string newWord = word.substr(0, i) + '*' + word.substr(i + 1);
+                this->allComboDict[newWord].push_back(word);
             }
-        });
+        }
 
-        // Queues for birdirectional BFS
-        // BFS starting from beginWord
-        Queue<Pair<String, Integer>> Q_begin = new LinkedList<>();
-        // BFS starting from endWord
-        Queue<Pair<String, Integer>> Q_end = new LinkedList<>();
-        Q_begin.add(new Pair(beginWord, 1));
-        Q_end.add(new Pair(endWord, 1));
+        std::queue<std::pair<std::string, int>> Q_begin;
+        std::queue<std::pair<std::string, int>> Q_end;
+        Q_begin.push({beginWord, 1});
+        Q_end.push({endWord, 1});
 
-        // Visited to make sure we don't repeat processing same word.
-        Map<String, Integer> visitedBegin = new HashMap<>();
-        Map<String, Integer> visitedEnd = new HashMap<>();
-        visitedBegin.put(beginWord, 1);
-        visitedEnd.put(endWord, 1);
+        std::unordered_map<std::string, int> visitedBegin{{beginWord, 1}};
+        std::unordered_map<std::string, int> visitedEnd{{endWord, 1}};
         int ans = -1;
-        
-        while (!Q_begin.isEmpty() && !Q_end.isEmpty()) {
-            
-            // Progress forward one step from the shorter queue
+
+        while (!Q_begin.empty() && !Q_end.empty()) {
             if (Q_begin.size() <= Q_end.size()) {
                 ans = visitWordNode(Q_begin, visitedBegin, visitedEnd);
             } else {
-                ans = visitWordNode(Q_end, visitedEnd, visitedBegin);    
+                ans = visitWordNode(Q_end, visitedEnd, visitedBegin);
             }
 
             if (ans > -1) {
@@ -270,7 +237,7 @@ class Solution {
 
         return 0;
     }
-}
+};
 ----------------------------------------------------------------------------------------------------------------
 /*
 word ladder2
@@ -725,3 +692,59 @@ public:
     }
 };
 ------------------------------------------------------------------------------------
+
+
+
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <queue>
+
+class Solution {
+public:
+    int ladderLength(std::string beginWord, std::string endWord, std::vector<std::string>& wordList) {
+        int L = beginWord.length();
+
+        // Dictionary to hold combinations of words that can be formed by changing one letter at a time.
+        std::unordered_map<std::string, std::vector<std::string>> allComboDict;
+
+        for (const std::string& word : wordList) {
+            for (int i = 0; i < L; i++) {
+                std::string newWord = word.substr(0, i) + '*' + word.substr(i + 1, L);
+                allComboDict[newWord].push_back(word);
+            }
+        }
+
+        // Queue for BFS
+        std::queue<std::pair<std::string, int>> Q;
+        Q.push({beginWord, 1});
+
+        // Visited to ensure we don't repeat processing the same word.
+        std::unordered_map<std::string, bool> visited;
+        visited[beginWord] = true;
+
+        while (!Q.empty()) {
+            auto node = Q.front();
+            Q.pop();
+            std::string word = node.first;
+            int level = node.second;
+
+            for (int i = 0; i < L; i++) {
+                std::string newWord = word.substr(0, i) + '*' + word.substr(i + 1, L);
+
+                for (const std::string& adjacentWord : allComboDict[newWord]) {
+                    if (adjacentWord == endWord) {
+                        return level + 1;
+                    }
+
+                    if (!visited[adjacentWord]) {
+                        visited[adjacentWord] = true;
+                        Q.push({adjacentWord, level + 1});
+                    }
+                }
+            }
+        }
+
+        return 0;
+    }
+};
